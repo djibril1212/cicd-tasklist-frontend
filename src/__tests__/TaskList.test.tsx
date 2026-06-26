@@ -22,38 +22,57 @@ const mockTasks: Task[] = [
 	},
 ];
 
+function renderList(props: Partial<React.ComponentProps<typeof TaskList>> = {}) {
+	render(
+		<TaskList
+			tasks={mockTasks}
+			loading={false}
+			error={null}
+			onToggle={vi.fn()}
+			onDelete={vi.fn()}
+			onEdit={vi.fn()}
+			{...props}
+		/>
+	);
+}
+
 describe('TaskList', () => {
 	it('shows loading state', () => {
-		render(
-			<TaskList
-				tasks={[]}
-				loading={true}
-				error={null}
-				onToggle={vi.fn()}
-				onDelete={vi.fn()}
-				onEdit={vi.fn()}
-			/>
-		);
+		renderList({ tasks: [], loading: true });
 		expect(screen.getByTestId('loading')).toBeInTheDocument();
 		expect(screen.getByText('Chargement des tâches...')).toBeInTheDocument();
 	});
 
-	it('renders list of tasks', () => {
-		render(
-			<TaskList
-				tasks={mockTasks}
-				loading={false}
-				error={null}
-				onToggle={vi.fn()}
-				onDelete={vi.fn()}
-				onEdit={vi.fn()}
-			/>
-		);
+	it('shows the error state', () => {
+		renderList({ tasks: [], error: 'Boom' });
+		expect(screen.getByTestId('error')).toBeInTheDocument();
+		expect(screen.getByText('Erreur : Boom')).toBeInTheDocument();
+	});
+
+	it('shows the empty state when there are no tasks', () => {
+		renderList({ tasks: [] });
+		expect(screen.getByTestId('empty')).toBeInTheDocument();
+		expect(screen.getByText('Aucune tâche')).toBeInTheDocument();
+	});
+
+	it('renders the list of tasks with plural counts', () => {
+		renderList();
 		expect(screen.getByTestId('task-list')).toBeInTheDocument();
 		expect(screen.getByText('Première tâche')).toBeInTheDocument();
 		expect(screen.getByText('Deuxième tâche')).toBeInTheDocument();
 		expect(screen.getByText('2 tâches')).toBeInTheDocument();
+		expect(screen.getByText('1 terminée')).toBeInTheDocument();
 	});
 
-	// ... TODO: Add more tests
+	it('uses singular wording for a single task', () => {
+		renderList({ tasks: [mockTasks[0]] });
+		expect(screen.getByText('1 tâche')).toBeInTheDocument();
+		expect(screen.getByText('0 terminée')).toBeInTheDocument();
+	});
+
+	it('uses plural wording for multiple completed tasks', () => {
+		const allDone = mockTasks.map((t) => ({ ...t, completed: true }));
+		renderList({ tasks: allDone });
+		expect(screen.getByText('2 terminées')).toBeInTheDocument();
+	});
 });
