@@ -17,7 +17,8 @@ pipeline {
         SONAR_TOKEN    = credentials('sonar-token-frontend')
         // Images d'outils épinglées (pas de tag flottant)
         NODE_IMAGE     = 'node:20-alpine'
-        SCANNER_IMAGE  = 'sonarsource/sonar-scanner-cli:11'
+        // CLI 8.0.1 épinglée par digest (compatible SonarQube 9.9 ; le tag :11 = CLI 7.3.0 ne l'est pas)
+        SCANNER_IMAGE  = 'sonarsource/sonar-scanner-cli@sha256:23ca0f137965d9dff2198074043fd48d386280bc5d0ccac8c8349cea4cf096a9'
         TRIVY_IMAGE    = 'aquasec/trivy:0.66.0'
         // Jenkins tourne en conteneur : on partage son workspace (volume nommé)
         // avec les conteneurs d'outils via --volumes-from.
