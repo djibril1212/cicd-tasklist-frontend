@@ -119,10 +119,13 @@ pipeline {
                     passwordVariable: 'DH_PASS')]) {
                     // login via stdin : le secret ne passe pas par argv
                     sh '''
+                        export DOCKER_CONFIG="${WORKSPACE}/.docker"
+                        mkdir -p "$DOCKER_CONFIG"
                         echo "$DH_PASS" | docker login -u "$DH_USER" --password-stdin
                         docker push ${IMAGE}:${BUILD_NUMBER}
                         docker push ${IMAGE}:latest
                         docker logout
+                        rm -rf "$DOCKER_CONFIG"
                     '''
                 }
             }
