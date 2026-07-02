@@ -80,18 +80,18 @@ pipeline {
                 sh '''
                     docker run --rm \
                       -v /var/run/docker.sock:/var/run/docker.sock \
-                      -v "$HOME/.cache/trivy":/root/.cache/ \
+                      -v trivy-cache:/root/.cache/ \
                       ${TRIVY_IMAGE} image \
                       --scanners vuln --severity CRITICAL,HIGH --exit-code 0 \
                       ${IMAGE}:latest
                 '''
-                // 2) Gate de sécurité : le build ÉCHOUE si une CRITICAL est trouvée
+                // 2) Gate de sécurité : le build ÉCHOUE si une CRITICAL/HIGH est trouvée
                 sh '''
                     docker run --rm \
                       -v /var/run/docker.sock:/var/run/docker.sock \
-                      -v "$HOME/.cache/trivy":/root/.cache/ \
+                      -v trivy-cache:/root/.cache/ \
                       ${TRIVY_IMAGE} image \
-                      --scanners vuln --severity CRITICAL --exit-code 1 --quiet \
+                      --scanners vuln --severity CRITICAL,HIGH --exit-code 1 --quiet \
                       ${IMAGE}:latest
                 '''
             }
@@ -102,7 +102,7 @@ pipeline {
                 sh '''
                     docker run --rm ${DOCKER_WS} \
                       -v /var/run/docker.sock:/var/run/docker.sock \
-                      -v "$HOME/.cache/trivy":/root/.cache/ \
+                      -v trivy-cache:/root/.cache/ \
                       ${TRIVY_IMAGE} image \
                       --format spdx-json --output ${WORKSPACE}/sbom-spdx.json \
                       ${IMAGE}:latest
